@@ -5,7 +5,7 @@ A machine learning-based system that detects fraudulent UPI IDs and suspicious t
 
 An AI-powered fraud detection system that identifies fraudulent UPI IDs and suspicious transactions using ensemble machine learning with **97% accuracy**.
 
----
+--
 
 ## 📌 Quick Overview
 
