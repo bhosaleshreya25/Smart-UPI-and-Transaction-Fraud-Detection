@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Shield | AI Fraud Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #f0f2f5; color: #1a1a2e; }
+        .premium-nav { background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .logo-icon i { font-size: 1.3rem; color: white; }
+        .logo-text h1 { font-size: 1.3rem; font-weight: 700; }
+        .logo-text span { color: #667eea; }
+        .logo-text p { font-size: 0.7rem; color: #666; }
+        .nav-links { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .nav-link { padding: 0.6rem 1.2rem; border-radius: 10px; text-decoration: none; color: #4a5568; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: all 0.3s; cursor: pointer; }
+        .nav-link:hover, .nav-link.active { background: #f0f2f5; color: #667eea; }
+        .main-container { max-width: 1400px; margin: 0 auto; padding: 2rem; min-height: calc(100vh - 200px); }
+        .premium-card { background: white; border-radius: 20px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s; }
+        .premium-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .hero-section { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 24px; padding: 3rem; color: white; margin-bottom: 2rem; }
+        .hero-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 0.3rem 1rem; border-radius: 50px; font-size: 0.8rem; margin-bottom: 1rem; }
+        .hero-section h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .hero-section p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 2rem; }
+        .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn-primary, .btn-secondary { padding: 0.8rem 1.8rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-secondary { background: rgba(255,255,255,0.2); color: white; }
+        .btn-primary:hover, .btn-secondary:hover { transform: translateY(-2px); }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 20px; display: flex; align-items: center; gap: 1rem; transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .stat-icon { width: 50px; height: 50px; background: #f0f2f5; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+        .stat-icon i { font-size: 1.5rem; color: #667eea; }
+        .stat-info h3 { font-size: 1.8rem; font-weight: 800; }
+        .stat-info p { color: #666; font-size: 0.85rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }
+        .premium-input { width: 100%; padding: 0.9rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 1rem; transition: all 0.3s; }
+        .premium-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+        .risk-meter { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin: 15px 0; }
+        .risk-fill { height: 100%; transition: width 0.5s ease; }
+        .result-card { margin-top: 1.5rem; padding: 1.5rem; border-radius: 16px; animation: fadeIn 0.3s; }
+        .result-critical { background: #fee2e2; border-left: 4px solid #dc3545; }
+        .result-high { background: #fff3cd; border-left: 4px solid #ffc107; }
+        .result-medium { background: #fff3cd; border-left: 4px solid #ffc107; }
+        .result-low { background: #d4edda; border-left: 4px solid #28a745; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .full-width { grid-column: span 2; }
+        .chart-container { height: 280px; position: relative; }
+        .model-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
+        .model-perf-card { background: #f8f9fa; padding: 1rem; border-radius: 12px; text-align: center; }
+        .model-perf-card.winner { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .model-name { font-weight: 600; margin-bottom: 0.5rem; }
+        .model-accuracy { font-size: 1.5rem; font-weight: 800; color: #667eea; }
+        .progress { height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 0.5rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 3px; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        .data-table th { background: #f8f9fa; font-weight: 600; }
+        .winner-row { background: #fef3c7; }
+        .footer { background: #1a1a2e; color: white; padding: 2rem; text-align: center; margin-top: 3rem; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .action-card { background: white; padding: 1.2rem; border-radius: 16px; display: flex; align-items: center; gap: 1rem; cursor: pointer; transition: all 0.3s; }
+        .action-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .action-icon { width: 45px; height: 45px; background: #f0f2f5; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .action-icon i { font-size: 1.3rem; color: #667eea; }
+        .action-text h4 { font-size: 1rem; margin-bottom: 0.2rem; }
+        .action-text p { font-size: 0.75rem; color: #666; }
+        .quick-suggestions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+        .suggestion-chip { background: #f0f2f5; border: none; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; }
+        .suggestion-chip:hover { background: #667eea; color: white; }
+        .model-tags { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
+        .model-tag { background: #f0f2f5; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
+        .toast-notification { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 12px; color: white; z-index: 10000; animation: slideIn 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @media (max-width: 768px) { .stats-grid, .dashboard-grid, .model-cards, .quick-actions { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } .hero-section h1 { font-size: 1.8rem; } .nav-container { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<nav class="premium-nav">
+    <div class="nav-container">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="logo-text"><h1>UPI <span>Shield</span></h1><p>AI Fraud Detection</p></div>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a>
+            <a class="nav-link" data-page="upi-verify"><i class="fas fa-id-card"></i> UPI Verify</a>
+            <a class="nav-link" data-page="transaction"><i class="fas fa-exchange-alt"></i> Transaction</a>
+            <a class="nav-link" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a class="nav-link" data-page="report"><i class="fas fa-flag"></i> Report</a>
+        </div>
+    </div>
+</nav>
+
+<main class="main-container">
+    <!-- HOME PAGE -->
+    <div id="home-page" class="page active-page">
+        <div class="hero-section">
+            <div class="hero-badge"><i class="fas fa-microchip"></i> 6 ML Models | 93.7% Accuracy</div>
+            <h1>Intelligent UPI Fraud<br>Detection System</h1>
+            <p>Protect your digital payments with ensemble machine learning and real-time fraud detection</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" id="homeVerifyBtn"><i class="fas fa-search"></i> Verify UPI</button>
+                <button class="btn-secondary" id="homeAnalyzeBtn"><i class="fas fa-chart-line"></i> Analyze Transaction</button>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-database"></i></div><div class="stat-info"><h3>10K+</h3><p>UPI Records</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-brain"></i></div><div class="stat-info"><h3>6</h3><p>ML Models</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-chart-line"></i></div><div class="stat-info"><h3>93.7%</h3><p>Accuracy</p></div></div>
+            <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>&lt;100ms</h3><p>Response Time</p></div></div>
+        </div>
+        <div class="quick-actions">
+            <div class="action-card" id="quickVerify"><div class="action-icon"><i class="fas fa-id-card"></i></div><div class="action-text"><h4>Verify UPI</h4><p>Check UPI safety status</p></div><i class="fas fa-arrow-right"></i></div>
+            <div class="action-card" id="quickAnalyze"><div class="action-icon"><i class="fas fa-chart-line"></i></div><div class="action-text"><h4>Risk Analysis</h4><p>Analyze transaction risk</p></div><i class="fas fa-arrow-right"></i></div>
+            <div class="action-card" id="quickReport"><div class="action-icon"><i class="fas fa-flag"></i></div><div class="action-text"><h4>Report Fraud</h4><p>Help protect others</p></div><i class="fas fa-arrow-right"></i></div>
+        </div>
+        <div class="premium-card">
+            <h3><i class="fas fa-chart-simple"></i> Model Performance</h3>
+            <div class="model-cards">
+                <div class="model-perf-card winner"><div class="model-name"><i class="fas fa-crown"></i> XGBoost</div><div class="model-accuracy">93.7%</div><div class="progress"><div class="progress-fill" style="width:93.7%"></div></div></div>
+                <div class="model-perf-card"><div class="model-name"><i class="fas fa-tree"></i> Random Forest</div><div class="model-accuracy">93.2%</div><div class="progress"><div class="progress-fill" style="width:93.2%"></div></div></div>
+                <div class="model-perf-card"><div class="model-name"><i class="fas fa-chart-line"></i> Gradient Boost</div><div class="model-accuracy">92.8%</div><div class="progress"><div class="progress-fill" style="width:92.8%"></div></div></div>
+                <div class="model-perf-card"><div class="model-name"><i class="fas fa-chart-simple"></i> SVM</div><div class="model-accuracy">92.3%</div><div class="progress"><div class="progress-fill" style="width:92.3%"></div></div></div>
+                <div class="model-perf-card"><div class="model-name"><i class="fas fa-layer-group"></i> AdaBoost</div><div class="model-accuracy">91.8%</div><div class="progress"><div class="progress-fill" style="width:91.8%"></div></div></div>
+                <div class="model-perf-card"><div class="model-name"><i class="fas fa-chart-bar"></i> Logistic Reg</div><div class="model-accuracy">91.2%</div><div class="progress"><div class="progress-fill" style="width:91.2%"></div></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPI VERIFY PAGE -->
+    <div id="upi-verify-page" class="page">
+        <div class="premium-card">
+            <h2><i class="fas fa-id-card"></i> UPI Verification</h2>
+            <div class="form-group"><label>Enter UPI ID</label><input type="text" id="upiInput" class="premium-input" placeholder="e.g., username@bankname"></div>
+            <div class="quick-suggestions">
+                <span>Quick test:</span>
+                <button class="suggestion-chip" data-upi="rahul123@okhdfcbank">rahul123@okhdfcbank</button>
+                <button class="suggestion-chip" data-upi="fraud@paytm">fraud@paytm</button>
+                <button class="suggestion-chip" data-upi="test123@xyz">test123@xyz</button>
+                <button class="suggestion-chip" data-upi="1111111@@scam">1111111@@scam</button>
+            </div>
+            <button id="verifyBtn" class="btn-primary"><i class="fas fa-search"></i> Verify UPI</button>
+            <button id="reportUpiBtn" class="btn-secondary"><i class="fas fa-flag"></i> Report as Fraud</button>
+            <div id="upiResult" class="result-card" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- TRANSACTION PAGE -->
+    <div id="transaction-page" class="page">
+        <div class="premium-card">
+            <h2><i class="fas fa-exchange-alt"></i> Transaction Risk Analysis</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+                <div>
+                    <div class="form-group"><label>Amount (₹)</label><input type="number" id="txnAmount" class="premium-input" value="25000"></div>
+                    <div class="form-group"><label>Hour (0-23)</label><input type="number" id="txnHour" class="premium-input" value="23"></div>
+                    <div class="form-group"><label>Frequency (last hour)</label><input type="number" id="txnFreq" class="premium-input" value="3"></div>
+                </div>
+                <div>
+                    <div class="form-group"><label>UPI ID (optional)</label><input type="text" id="txnUpi" class="premium-input" placeholder="payee@bank"></div>
+                    <div class="form-group"><label>Avg Amount (behavioral)</label><input type="number" id="avgAmount" class="premium-input" value="5000"></div>
+                    <div class="form-group"><label>Amount Deviation</label><input type="number" id="amountDev" class="premium-input" readonly></div>
+                </div>
+            </div>
+            <button id="analyzeTxnBtn" class="btn-primary"><i class="fas fa-microchip"></i> Analyze with ML Ensemble</button>
+            <button id="reportTxnBtn" class="btn-secondary"><i class="fas fa-exclamation-triangle"></i> Report Transaction</button>
+            <div id="txnResult" class="result-card" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboard-page" class="page">
+        <div class="premium-card">
+            <h2><i class="fas fa-chart-line"></i> ML Performance Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="chart-container"><canvas id="accuracyChart"></canvas></div>
+                <div class="chart-container"><canvas id="fraudPieChart"></canvas></div>
+                <div class="full-width chart-container"><canvas id="featureChart"></canvas></div>
+            </div>
+        </div>
+        <div class="premium-card">
+            <h3><i class="fas fa-th"></i> Confusion Matrix (XGBoost)</h3>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem;">
+                <div style="background:#d4edda; padding:1rem; border-radius:12px; text-align:center;"><strong>TP</strong><br><span id="tpValue">328</span><br>Fraud Caught</div>
+                <div style="background:#f8d7da; padding:1rem; border-radius:12px; text-align:center;"><strong>FP</strong><br><span id="fpValue">24</span><br>False Alarms</div>
+                <div style="background:#d1ecf1; padding:1rem; border-radius:12px; text-align:center;"><strong>TN</strong><br><span id="tnValue">1894</span><br>Normal Safe</div>
+                <div style="background:#fff3cd; padding:1rem; border-radius:12px; text-align:center;"><strong>FN</strong><br><span id="fnValue">34</span><br>Missed Fraud</div>
+            </div>
+            <p style="margin-top:1rem; text-align:center;">Precision: 93.2% | Recall: 90.6% | F1-Score: 91.9%</p>
+        </div>
+        <div class="premium-card">
+            <h3><i class="fas fa-table"></i> Model Comparison</h3>
+            <div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Weight</th></tr></thead><tbody id="modelTable"></tbody><tr></div>
+        </div>
+    </div>
+
+    <!-- REPORT PAGE -->
+    <div id="report-page" class="page">
+        <div class="premium-card">
+            <h2><i class="fas fa-flag-checkered"></i> Fraud Reporting Center</h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+                <div>
+                    <h3><i class="fas fa-user-slash"></i> Report Fraudulent UPI</h3>
+                    <div class="form-group"><input type="text" id="reportUpiField" class="premium-input" placeholder="Enter fraudulent UPI ID"></div>
+                    <div class="form-group"><select id="reportReason" class="premium-input"><option value="">Select reason</option><option value="fake">Fake / Impersonation</option><option value="scam">Scam / Fraud attempt</option><option value="suspicious">Suspicious activity</option></select></div>
+                    <button id="submitUpiReport" class="btn-primary"><i class="fas fa-ban"></i> Report UPI</button>
+                </div>
+                <div>
+                    <h3><i class="fas fa-file-invoice"></i> Report Transaction</h3>
+                    <div class="form-group"><input type="text" id="reportTxnRef" class="premium-input" placeholder="Transaction Reference"></div>
+                    <div class="form-group"><input type="text" id="reportTxnUpiField" class="premium-input" placeholder="UPI ID involved"></div>
+                    <div class="form-group"><textarea id="txnDetails" class="premium-input" rows="2" placeholder="Additional details"></textarea></div>
+                    <button id="submitTxnReport" class="btn-primary"><i class="fas fa-bell"></i> Submit Report</button>
+                </div>
+            </div>
+            <div id="reportFeedback" class="result-card" style="display:none; margin-top:1rem;"></div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <p>© 2026 UPI Shield - Advanced Fraud Detection System</p>
+</footer>
+
+<script>
+    function showNotification(message, type) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.style.background = type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#28a745';
+        toast.style.color = type === 'warning' ? '#333' : 'white';
+        toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    const pages = ['home-page', 'upi-verify-page', 'transaction-page', 'dashboard-page', 'report-page'];
+    function showPage(pageId) {
+        pages.forEach(pid => document.getElementById(pid).classList.remove('active-page'));
+        document.getElementById(pageId).classList.add('active-page');
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        const activeNav = Array.from(document.querySelectorAll('.nav-link')).find(link => link.getAttribute('data-page') === pageId.replace('-page', ''));
+        if(activeNav) activeNav.classList.add('active');
+        if (pageId === 'dashboard-page') initCharts();
+    }
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const p = link.getAttribute('data-page');
+            if (p === 'home') showPage('home-page');
+            else if (p === 'upi-verify') showPage('upi-verify-page');
+            else if (p === 'transaction') showPage('transaction-page');
+            else if (p === 'dashboard') showPage('dashboard-page');
+            else if (p === 'report') showPage('report-page');
+        });
+    });
+
+    document.getElementById('homeVerifyBtn')?.addEventListener('click', () => showPage('upi-verify-page'));
+    document.getElementById('homeAnalyzeBtn')?.addEventListener('click', () => showPage('transaction-page'));
+    document.getElementById('quickVerify')?.addEventListener('click', () => showPage('upi-verify-page'));
+    document.getElementById('quickAnalyze')?.addEventListener('click', () => showPage('transaction-page'));
+    document.getElementById('quickReport')?.addEventListener('click', () => showPage('report-page'));
+
+    // UPI VERIFICATION - REAL API CALL
+    document.getElementById('verifyBtn')?.addEventListener('click', async () => {
+        const upi = document.getElementById('upiInput').value.trim();
+        if (!upi) { showNotification('Please enter UPI ID', 'error'); return; }
+        
+        const btn = document.getElementById('verifyBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verifying...';
+        btn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/verify-upi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ upi_id: upi })
+            });
+            const result = await response.json();
+            
+            if (result.error) {
+                showNotification(result.error, 'error');
+                return;
+            }
+            
+            const container = document.getElementById('upiResult');
+            container.style.display = 'block';
+            
+            let resultClass = '';
+            if (result.risk_score >= 70) resultClass = 'result-critical';
+            else if (result.risk_score >= 50) resultClass = 'result-high';
+            else if (result.risk_score >= 30) resultClass = 'result-medium';
+            else resultClass = 'result-low';
+            container.className = `result-card ${resultClass}`;
+            
+            let warningsHtml = '';
+            if (result.warnings && result.warnings.length > 0) {
+                warningsHtml = `<div style="margin-top: 10px;"><strong>⚠️ Risk Factors:</strong><ul>${result.warnings.map(w => `<li>${w}</li>`).join('')}</ul></div>`;
+            }
+            
+            let modelsHtml = '<div class="model-tags">';
+            if (result.model_predictions) {
+                Object.entries(result.model_predictions).forEach(([name, score]) => {
+                    modelsHtml += `<span class="model-tag ${name === 'XGBoost' ? 'winner' : ''}">${name}: ${score}%</span>`;
+                });
+            }
+            modelsHtml += '</div>';
+            
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="font-size:1.2rem; font-weight:800;">Risk Score: ${result.risk_score}%</span>
+                    <span style="background:${result.border_color || '#28a745'}; color:white; padding:4px 12px; border-radius:20px;">${result.risk_level}</span>
+                </div>
+                <div class="risk-meter"><div class="risk-fill" style="width:${result.risk_score}%; background:${result.border_color || '#28a745'};"></div></div>
+                <p><strong>${result.message}</strong></p>
+                <p><i class="fas fa-gavel"></i> Action: ${result.action}</p>
+                ${warningsHtml}
+                ${modelsHtml}
+            `;
+            
+            showNotification(`Risk Level: ${result.risk_level}`, result.risk_score < 45 ? 'success' : 'warning');
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Server error. Make sure backend is running on port 5000', 'error');
+            document.getElementById('upiResult').innerHTML = '<div class="result-critical" style="padding:1rem;">❌ Error connecting to server.</div>';
+            document.getElementById('upiResult').style.display = 'block';
+        } finally {
+            btn.innerHTML = '<i class="fas fa-search"></i> Verify UPI';
+            btn.disabled = false;
+        }
+    });
+
+    document.getElementById('reportUpiBtn')?.addEventListener('click', async () => {
+        const upi = document.getElementById('upiInput').value.trim();
+        if (!upi) { showNotification('Enter UPI ID', 'error'); return; }
+        try {
+            const response = await fetch('/api/report-upi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ upi_id: upi }) });
+            const result = await response.json();
+            showNotification(result.message, 'success');
+        } catch (error) { showNotification('Report failed', 'error'); }
+    });
+
+    document.getElementById('analyzeTxnBtn')?.addEventListener('click', async () => {
+        const amount = parseFloat(document.getElementById('txnAmount').value);
+        const hour = parseInt(document.getElementById('txnHour').value);
+        const freq = parseInt(document.getElementById('txnFreq').value);
+        const upiId = document.getElementById('txnUpi').value.trim();
+        
+        if (amount <= 0) { showNotification('Enter valid amount', 'error'); return; }
+        
+        const btn = document.getElementById('analyzeTxnBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Analyzing...';
+        btn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/analyze-transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, hour, frequency: freq, upi_id: upiId })
+            });
+            const result = await response.json();
+            
+            const container = document.getElementById('txnResult');
+            container.style.display = 'block';
+            
+            let resultClass = '';
+            if (result.risk_score >= 70) resultClass = 'result-critical';
+            else if (result.risk_score >= 50) resultClass = 'result-high';
+            else if (result.risk_score >= 30) resultClass = 'result-medium';
+            else resultClass = 'result-low';
+            container.className = `result-card ${resultClass}`;
+            
+            let reasonsHtml = '';
+            if (result.reasons && result.reasons.length > 0) {
+                reasonsHtml = `<div style="margin-top: 10px;"><strong>Risk Factors:</strong><ul>${result.reasons.map(r => `<li>${r}</li>`).join('')}</ul></div>`;
+            }
+            
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="font-size:1.2rem; font-weight:800;">Risk Score: ${result.risk_score}%</span>
+                    <span style="background:${result.color}; color:white; padding:4px 12px; border-radius:20px;">${result.risk_level}</span>
+                </div>
+                <div class="risk-meter"><div class="risk-fill" style="width:${result.risk_score}%; background:${result.color};"></div></div>
+                <p><strong>${result.action}</strong></p>
+                <p>${result.recommendation}</p>
+                ${reasonsHtml}
+            `;
+            showNotification(`Risk Score: ${result.risk_score}%`, result.risk_score < 50 ? 'success' : 'warning');
+        } catch (error) { showNotification('Analysis failed', 'error'); }
+        finally { btn.innerHTML = '<i class="fas fa-microchip"></i> Analyze with ML Ensemble'; btn.disabled = false; }
+    });
+
+    document.getElementById('reportTxnBtn')?.addEventListener('click', async () => {
+        const upi = document.getElementById('txnUpi').value.trim();
+        if (!upi) { showNotification('Enter UPI ID', 'error'); return; }
+        try {
+            const response = await fetch('/api/report-upi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ upi_id: upi }) });
+            const result = await response.json();
+            showNotification(result.message, 'success');
+        } catch (error) { showNotification('Report failed', 'error'); }
+    });
+
+    function calcDeviation() {
+        const amt = parseFloat(document.getElementById('txnAmount')?.value) || 0;
+        const avg = parseFloat(document.getElementById('avgAmount')?.value) || 0;
+        if (avg > 0) document.getElementById('amountDev').value = Math.abs(amt - avg);
+    }
+    document.getElementById('txnAmount')?.addEventListener('input', calcDeviation);
+    document.getElementById('avgAmount')?.addEventListener('input', calcDeviation);
+
+    document.querySelectorAll('.suggestion-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.getElementById('upiInput').value = chip.dataset.upi;
+            document.getElementById('verifyBtn').click();
+        });
+    });
+
+    document.getElementById('submitUpiReport')?.addEventListener('click', async () => {
+        const upi = document.getElementById('reportUpiField').value.trim();
+        const reason = document.getElementById('reportReason').value;
+        if (!upi) { showNotification('Enter UPI ID', 'error'); return; }
+        try {
+            const response = await fetch('/api/report-upi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ upi_id: upi, reason: reason }) });
+            const result = await response.json();
+            document.getElementById('reportFeedback').style.display = 'block';
+            document.getElementById('reportFeedback').className = 'result-card result-low';
+            document.getElementById('reportFeedback').innerHTML = `<i class="fas fa-check-circle"></i> ${result.message}`;
+            document.getElementById('reportUpiField').value = '';
+            setTimeout(() => document.getElementById('reportFeedback').style.display = 'none', 3000);
+            showNotification(result.message, 'success');
+        } catch (error) { showNotification('Report failed', 'error'); }
+    });
+
+    document.getElementById('submitTxnReport')?.addEventListener('click', async () => {
+        const ref = document.getElementById('reportTxnRef').value.trim();
+        const upi = document.getElementById('reportTxnUpiField').value.trim();
+        if (!ref && !upi) { showNotification('Enter reference or UPI', 'error'); return; }
+        try {
+            const response = await fetch('/api/report-transaction', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transaction_id: ref, upi_id: upi }) });
+            const result = await response.json();
+            document.getElementById('reportFeedback').style.display = 'block';
+            document.getElementById('reportFeedback').className = 'result-card result-low';
+            document.getElementById('reportFeedback').innerHTML = `<i class="fas fa-check-circle"></i> ${result.message}`;
+            document.getElementById('reportTxnRef').value = '';
+            document.getElementById('reportTxnUpiField').value = '';
+            setTimeout(() => document.getElementById('reportFeedback').style.display = 'none', 3000);
+            showNotification('Report submitted', 'success');
+        } catch (error) { showNotification('Report failed', 'error'); }
+    });
+
+    let accuracyChart, fraudPieChart, featureChart;
+    function initCharts() {
+        const accCtx = document.getElementById('accuracyChart')?.getContext('2d');
+        if (accCtx) { if (accuracyChart) accuracyChart.destroy(); accuracyChart = new Chart(accCtx, { type: 'bar', data: { labels: ['XGBoost', 'Random Forest', 'Grad Boost', 'SVM', 'AdaBoost', 'Logistic'], datasets: [{ label: 'Accuracy (%)', data: [93.7, 93.2, 92.8, 92.3, 91.8, 91.2], backgroundColor: '#667eea', borderRadius: 8 }] }, options: { responsive: true, scales: { y: { min: 85, max: 100 } } } }); }
+        const pieCtx = document.getElementById('fraudPieChart')?.getContext('2d');
+        if (pieCtx) { if (fraudPieChart) fraudPieChart.destroy(); fraudPieChart = new Chart(pieCtx, { type: 'doughnut', data: { labels: ['Safe', 'Fraud'], datasets: [{ data: [78, 22], backgroundColor: ['#28a745', '#dc3545'] }] } }); }
+        const featCtx = document.getElementById('featureChart')?.getContext('2d');
+        if (featCtx) { if (featureChart) featureChart.destroy(); featureChart = new Chart(featCtx, { type: 'bar', data: { labels: ['Digit Ratio', 'Entropy', 'Suspicious Word', 'Report Count', 'Domain Valid'], datasets: [{ label: 'Importance', data: [0.28, 0.22, 0.18, 0.16, 0.10], backgroundColor: '#764ba2', borderRadius: 8 }] }, options: { responsive: true } }); }
+        const models = [{ name: 'XGBoost ⭐', acc: 93.7, prec: 93.2, rec: 90.6, f1: 91.9, weight: '28%', winner: true },{ name: 'Random Forest', acc: 93.2, prec: 92.5, rec: 90.8, f1: 91.6, weight: '22%', winner: false },{ name: 'Gradient Boosting', acc: 92.8, prec: 92.1, rec: 90.2, f1: 91.1, weight: '18%', winner: false },{ name: 'SVM', acc: 92.3, prec: 91.5, rec: 89.8, f1: 90.6, weight: '14%', winner: false },{ name: 'AdaBoost', acc: 91.8, prec: 91.2, rec: 90.5, f1: 90.8, weight: '10%', winner: false },{ name: 'Logistic Regression', acc: 91.2, prec: 90.8, rec: 89.8, f1: 90.3, weight: '8%', winner: false }];
+        document.getElementById('modelTable').innerHTML = models.map(m => `<tr ${m.winner ? 'class="winner-row"' : ''}><td>${m.winner ? '<i class="fas fa-crown"></i> ' : ''}${m.name}</td><td><strong>${m.acc}%</strong></strong></td><td>${m.prec}%</strong></td><td>${m.rec}%</strong></td><td>${m.f1}%</strong></td><td>${m.weight}</strong></tr>`).join('');
+    }
+
+    showPage('home-page');
+    const observer = new MutationObserver(() => { if (document.getElementById('dashboard-page').classList.contains('active-page') && !accuracyChart) initCharts(); });
+    observer.observe(document.getElementById('dashboard-page'), { attributes: true, attributeFilter: ['class'] });
+</script>
+</body>
+</html>
